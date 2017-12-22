@@ -1,3 +1,5 @@
+//Magic to parse the hidden general sheet information to recreate where
+//each stanza of the agenda page starts and stops.
 function getGenInfo(sheet ) { //parse general sheet of existing ORP
 
   var nrows=sheet.getLastRow()

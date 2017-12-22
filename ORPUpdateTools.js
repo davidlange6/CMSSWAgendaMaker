@@ -1,3 +1,6 @@
+//Functions for updating existing ORP agendas
+//
+//Main driver function - updates both general sheet and release by release sheets
 function updateORP(ssheet,issues,lastORPDetails,recentReleases) {
   var sprSheet=SpreadsheetApp.open(DriveApp.getFileById(ssheet))
   var genSheet=makeGeneralPage(sprSheet,recentReleases,lastORPDetails) 
@@ -8,19 +11,21 @@ function updateORP(ssheet,issues,lastORPDetails,recentReleases) {
   } 
 }
 
+//Function to update single milestone (release) sheet
 function updateMilestonePage(sprSheet,milestone,issues) {
 
   var mileSheet=sprSheet.getSheetByName(milestone)
   if ( mileSheet == null ) return
   if ( mileSheet.getMaxRows() == 1 ) return // no PRs, nothing to do
   
+  //get the existing sheet information
   var range=mileSheet.getRange(2,1,mileSheet.getMaxRows()-1,6)
   var data=range.getValues()
   // 
   
   // otherwise, loop over the data and look for updates
   var foundPRs={}
-  for ( var i in issues) {
+  for ( var i in issues) { //issues is the new updated information
     var iss = issues[i]
     var pr = iss['prNum']
     var sigInfo=parseSigInfo(iss['labels'])
@@ -29,48 +34,38 @@ function updateMilestonePage(sprSheet,milestone,issues) {
     var testsPassed=sigInfo[2]
     
     //check this against the info we have from before
-    
     for ( var row in data ) {
       if ( data[row][0] != pr ) {
         continue;
       }
       foundPRs[data[row][0]]=1
 
-      //Logger.log("Found matching PR ",pr)
-      // matching PRs
+      //now just update information as needed to match current github state
       if ( data[row][3] != approvedSigs ) {
         mileSheet.getRange(parseInt(row)+2,4).setValue(approvedSigs) //add one for 0->1 and one for the header row
-        //Logger.log("updated signers "+pr)
       }
       if ( data[row][4] != pendingSigs ) {
-        mileSheet.getRange(parseInt(row)+2,5).setValue(pendingSigs)
-        //Logger.log("updated pending "+pr)
+        mileSheet.getRange(parseInt(row)+2,5).setValue(pendingSigs)        
       }
       if ( data[row][5] != testsPassed ) {
         mileSheet.getRange(parseInt(row)+2,6).setValue(testsPassed)
-        //Logger.log("updated test info "+pr)
       }
       break // no need to keep going
-    }
-    
+    } 
   }
-
-  //for ( var i in foundPRs ) { 
-  //  Logger.log('found this '+i)
-  //}
+  // done updating old information
   
   // hide rows for PRs that are closed already
   for ( var row in data) {
     if ( foundPRs[data[row][0]] != 1 ) {
       mileSheet.hideRows(parseInt(row)+2)
-      //Logger.log("It looks like a PR has already been closed. Hiding this row "+data[row][0])
     }
   }
   
-  // now add new ones
+  // now add new rows for new PRs
   var data=[]
   var formulas=[]
-  for ( var i in issues ) {
+  for ( var i in issues ) { //this code must be repeated elsewhere - could be consolidated
     var iss=issues[i]
     var pr=iss['prNum']
     if ( foundPRs[pr] == 1 ) {
@@ -86,6 +81,7 @@ function updateMilestonePage(sprSheet,milestone,issues) {
     formulas.push( ['=HYPERLINK("http://www.github.com/cms-sw/cmssw/pull/'+pr+'","'+pr+'")'] )
   }
   
+  //in one set of commands, add all the new rows
   var nCols=7
   var nNewRows=data.length
   if ( nNewRows > 0 ) {
@@ -109,6 +105,7 @@ function updateMilestonePage(sprSheet,milestone,issues) {
     protection.setDomainEdit(false);
   }
 
+  //redo the formatting with the new rows
   var nRows=mileSheet.getLastRow()
   if ( nRows>1 ) {
     var range=mileSheet.getRange(2,nCols,nRows-1,1)
