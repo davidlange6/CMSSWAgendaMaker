@@ -3,13 +3,6 @@ function releaseList() {
   return l
 }
 
-/*
-function releaseListLast() {//ugly - sometimes the set of releases are updated - this should be determinable from the google doc itself, but..
-  var l=["CMSSW_5_3_X","CMSSW_7_1_X","CMSSW_8_0_X","CMSSW_9_2_X","CMSSW_9_3_X","CMSSW_9_4_X","CMSSW_10_0_X"]
-  return l
-}
-*/
-
 // by hand list of milestones from GitHub
 function milestoneList() {
   var milestones = []
