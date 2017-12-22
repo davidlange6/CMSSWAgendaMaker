@@ -1,3 +1,4 @@
+//return a parsed JSON from a URL (eg, for GitHub API calls)
 function getJSONFromURL(urlToGet) {
   var urlToSend = UrlFetchApp.getRequest(urlToGet);
   //Logger.log(urlToSend['url'])
@@ -23,28 +24,22 @@ function days_between(date1, date2) {
     return Math.round(difference_ms/ONE_DAY)
 }
 
+//pretty hacky code to get the date of the next meeting.
 function nextTuesday() {
   var today = new Date()
-  Logger.log(today.getDate())
   var day = today.getDay();
-  Logger.log(day)
-  
+ 
   var tuesday = today.getDate() - day //+ (day === 0 ? -6 : 2) +7;
   // now we are back to last Sunday - go up to Tuesday
-  if ( day == 0) tuesday=tuesday + 2
-  if ( day == 1) tuesday=tuesday + 2
-  if ( day == 2) tuesday= tuesday +2
-  if ( day> 2 ) { 
-    tuesday = tuesday + 7+2
-  }
-  var closest = new Date(today.setDate(tuesday));
 
-  var orpStr='ORP'+formatDate(today)
-  Logger.log(tuesday)
-  Logger.log(day)
+  tuesday = tuesday +2
+  if ( day> 2 ) { 
+    tuesday = tuesday + 7
+  }
   
-  Logger.log(closest)
-  Logger.log(orpStr)
+  var closest = new Date(today.setDate(tuesday));
+  var orpStr='ORP'+formatDate(today)
+
   return [closest,orpStr]
 }
 

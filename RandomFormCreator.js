@@ -1,3 +1,7 @@
+//This file is all obsolete - it make a form for clang-tidy checking.
+//so its useful as example code to automatically create a form.
+//otherwise its not used.
+
 function makeNewForm(title) {
   var form = FormApp.create(title);
   return form
