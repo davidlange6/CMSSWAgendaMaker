@@ -1,8 +1,8 @@
 //return a parsed JSON from a URL (eg, for GitHub API calls)
-function getJSONFromURL(urlToGet) {
-  var urlToSend = UrlFetchApp.getRequest(urlToGet);
+function getJSONFromURL(urlToGet, options={}) {
+  //var urlToSend = UrlFetchApp.getRequest(urlToGet,options);
   //Logger.log(urlToSend['url'])
-  var response = UrlFetchApp.fetch(urlToGet);
+  var response = UrlFetchApp.fetch(urlToGet,options);
   var json = response.getContentText();
   var data = JSON.parse(json);
   return data;
