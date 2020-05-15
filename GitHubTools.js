@@ -31,7 +31,6 @@ function getIssues() {
     var data=[]
     for ( var page =1 ; page<100; page++ ) {
       var urlIssues="https://api.github.com/repos/cms-sw/cmssw/issues?state=open&milestone="+milestones[m]+"&per_page=100&page="+page;
-      urlIssues=urlIssues
       var dataT = getJSONFromURL(urlIssues,myTok);
       data=data.concat(dataT)
       if ( dataT.length != 100 ) break
