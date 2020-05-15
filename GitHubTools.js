@@ -31,8 +31,8 @@ function getIssues() {
     var data=[]
     for ( var page =1 ; page<100; page++ ) {
       var urlIssues="https://api.github.com/repos/cms-sw/cmssw/issues?state=open&milestone="+milestones[m]+"&per_page=100&page="+page;
-      urlIssues=urlIssues+"&access_token="+myTok
-      var dataT = getJSONFromURL(urlIssues);
+      urlIssues=urlIssues
+      var dataT = getJSONFromURL(urlIssues,myTok);
       data=data.concat(dataT)
       if ( dataT.length != 100 ) break
     } 
@@ -82,10 +82,9 @@ function getNewReleases(orpDate) {
   var myTok=auth()
   var data=[]
   for ( var page =1 ; page<100; page++ ) {
-    relUrl='https://api.github.com/repos/cms-sw/cmssw/releases?per_page=100&page='+page;
-    relUrl=relUrl+"&access_token="+myTok
+    relUrl='https://api.github.com/repos/cms-sw/cmssw/releases?per_page=100&page='+page;    
     
-    var t = getJSONFromURL(relUrl);
+    var t = getJSONFromURL(relUrl,myTok);
 
     var len=0;
     for ( var i in t ) {
@@ -211,17 +210,15 @@ function checkType() {
 function getPullRequestInfo(pr) { 
   var myTok=auth()
   
-  var urlIssues="https://api.github.com/repos/cms-sw/cmssw/pulls/"+pr;
-  urlIssues=urlIssues+"?access_token="+myTok
-  var dataT = getJSONFromURL(urlIssues);
+  var urlIssues="https://api.github.com/repos/cms-sw/cmssw/pulls/"+pr;  
+  var dataT = getJSONFromURL(urlIssues,myTok);
   return dataT;
 }
 
 function checkMyTok() {
   var myTok=auth()
-  var url="https://api.github.com/rate_limit";
-  url=url+"?access_token="+myTok
-  var dataT = getJSONFromURL(url);
+  var url="https://api.github.com/rate_limit";  
+  var dataT = getJSONFromURL(url,myTok);
   Logger.log(dataT)
   
 }
@@ -231,8 +228,8 @@ function getPullRequestComments(pr) {
   var page=1
   var data=[]
   while ( 1 ) {
-    var urlIssues="https://api.github.com/repos/cms-sw/cmssw/issues/"+pr+"/comments?page="+page+"&per_page=100&access_token="+myTok
-    var dataT = getJSONFromURL(urlIssues);
+    var urlIssues="https://api.github.com/repos/cms-sw/cmssw/issues/"+pr+"/comments?page="+page+"&per_page=100"
+    var dataT = getJSONFromURL(urlIssues,myTok);
     data=data.concat(dataT)
     if ( dataT.length !=100) break
     Logger.log("Number of comments "+data.length)
@@ -247,16 +244,16 @@ function getPullRequestComments(pr) {
 
 function getPullRequestCommits(pr) {
   var myTok=auth()
-  var urlIssues="https://api.github.com/repos/cms-sw/cmssw/pulls/"+pr+"/commits?access_token="+myTok
-  var data = getJSONFromURL(urlIssues);
+  var urlIssues="https://api.github.com/repos/cms-sw/cmssw/pulls/"+pr+"/commits"
+  var data = getJSONFromURL(urlIssues,myTok);
   //Logger.log(data.length)
   return data
 }
 
 function getPullRequestFiles(pr) {
   var myTok=auth()
-  var urlIssues="https://api.github.com/repos/cms-sw/cmssw/pulls/"+pr+"/files?access_token="+myTok
-  var data = getJSONFromURL(urlIssues);
+  var urlIssues="https://api.github.com/repos/cms-sw/cmssw/pulls/"+pr+"/files"
+  var data = getJSONFromURL(urlIssues,myTok);
   return data
 }
 
@@ -265,22 +262,24 @@ function closeIssue(pr) {
   var options = {
     'method' : "post",
     'contentType': 'application/json',
-    'payload' : JSON.stringify({'state' : "closed"})
+    'payload' : JSON.stringify({'state' : "closed"}),
+    'headers' : myTok['headers']
   };
-  var response = UrlFetchApp.fetch("https://api.github.com/repos/cms-sw/cmssw/issues/"+pr+"?access_token="+myTok, options);
+  var response = UrlFetchApp.fetch("https://api.github.com/repos/cms-sw/cmssw/issues/"+pr, options);
   var json = response.getContentText();
   Logger.log(json)
 }
 
 function addComment(pr,comment) {
-
+  var myTok=authBett()
   var options = {
     'method' : "post",
     'contentType': 'application/json',
-    'payload' : JSON.stringify({'body' : comment})
+    'payload' : JSON.stringify({'body' : comment}),
+    'headers' : myTok['headers']
   };
   Logger.log(options)
-  var myTok=authBett()
+ 
   var response = UrlFetchApp.fetch("https://api.github.com/repos/cms-sw/cmssw/issues/"+pr+"/comments"+"?access_token="+myTok, options);
   var json = response.getContentText();
   Logger.log(json)
@@ -298,15 +297,17 @@ function makePullRequest(orig,dest,title, comment) {
     "head": orig,
     "base": dest
   }
+  var myTok=authBett()
   var options = {
     'method' : "post",
     'contentType': 'application/json',
-    'payload' : JSON.stringify(body)
+    'payload' : JSON.stringify(body),
+    'headers' : myTok['headers']
   };
 
   Logger.log(options)
-  var myTok=authBett()
-  var response = UrlFetchApp.fetch("https://api.github.com/repos/cms-sw/cmssw/pulls?access_token="+myTok, options);
+  
+  var response = UrlFetchApp.fetch("https://api.github.com/repos/cms-sw/cmssw/pulls", options);
   var json = response.getContentText();
   Logger.log(json)
 }
@@ -318,11 +319,14 @@ function createFile(repo,filePathAndName,branch,contents) {
     "content": contents,
     "branch": branch
   }
-  var options = {
-    'method' : "put", 'payload' : body
-  };
   var myTok=authBett()
-  var response = UrlFetchApp.fetch("https://api.github.com/repos/"+repo+"/contents?access_token="+myTok, options);
+  var options = {
+    'method' : "put", 
+    'payload' : body,
+    'headers' : myTok['headers']
+  };
+  
+  var response = UrlFetchApp.fetch("https://api.github.com/repos/"+repo+"/contents", options);
   var json = response.getContentText();
 }
 
