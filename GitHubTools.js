@@ -289,7 +289,7 @@ function addComment(pr,comment) {
   };
   Logger.log(options)
  
-  var response = UrlFetchApp.fetch("https://api.github.com/repos/cms-sw/cmssw/issues/"+pr+"/comments, options);
+  var response = UrlFetchApp.fetch("https://api.github.com/repos/cms-sw/cmssw/issues/"+pr+"/comments", options);
   var json = response.getContentText();
   Logger.log(json)
 }
