@@ -180,11 +180,21 @@ function getGitHubDetails(lastORPDate) {
 // - In the new project, File->Manage versions to create a new version
 // - In this project, Resources->Libraries->AddLibrary with the project key 
 function auth() {
-  return MyGitHubAuth.auth()//real token is in separate library
+  var authHeader = 'token ' + MyGitHubAuth.auth();
+  var options = {
+          headers: {'Authorization' : authHeader}
+  }
+ 
+  return options;
 }
 
 function authBett() {
-  return MyGitHubAuth.authBett() //real token is in separate library
+  var authHeader = 'token ' + MyGitHubAuth.authBett();
+  var options = {
+          headers: {'Authorization' : authHeader}
+  }
+ 
+  return options;
 }
 
 function getRelCache() {
